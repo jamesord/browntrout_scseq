@@ -1,0 +1,3 @@
+/storage/workspaces/vetsuisse_fiwi_epev/fiwi_epev001/datasets/dataset_collection/trout/transcriptome/Salmo_trutta.fSalTru1.1.104.gtf	re	TRUE	5	TRUE	FALSE	FALSE
+/storage/homefs/jo20n766/trout_kidney_transcriptome/assembly/stringtie/stringtie_trout_merged_070423.gtf	st	FALSE	1	FALSE	TRUE	TRUE
+/storage/homefs/jo20n766/trout_kidney_transcriptome/assembly/mikado/gmap/all_transcripts_AusEst.okay.gmap.gff3	tr	FALSE	-0.5	FALSE	FALSE	TRUE

@@ -1,0 +1,95 @@
+#t2ac: EvidentialGene tr2aacds.pl VERSION 2022.01.20
+#t2ac: CMD: tr2aacds.pl  -species=Salmo_trutta -NCPU=16 -MAXMEM=160000 -cdnaseq all_transcripts_AusEst.fasta -pHeterozygosity 7
+#t2ac: NOTE: evd_smallclassfilter not enough evidence nev=157695 for ncds=2339362
+# Class Table for all_transcripts_AusEst.trclass 
+class    	%okay	%drop	okay	drop
+althi    	2	2.8	71424	97402
+althi1   	6	27.2	210085	945757
+althia2  	0.02	0.38	906	13425
+althinc  	1.7	0	62015	0
+altmfrag 	0.05	0.07	2072	2626
+altmfraga2	0	0	154	136
+altmid   	0.04	0.07	1603	2505
+altmida2 	0	0	87	36
+main     	1.5	0.48	54238	16705
+maina2   	0.19	0.01	6698	470
+mainnc   	1.9	0	65961	0
+noclass  	1.7	3.7	59010	131295
+noclassa2	0	0	18	37
+noclassa2nc	0	0	4	0
+noclassnc	2.3	0	79814	0
+parthi   	0	5.6	0	195622
+parthi1  	0	1	0	37054
+parthia2 	0	0.5	0	18930
+perfdupl 	0	32.1	0	1116413
+perffrag 	0	7.9	0	274649
+smallorf 	0	0	0	0
+---------------------------------------------
+total    	17.7	82.2	614089	2853062
+=============================================
+# AA-quality for okay set of all_transcripts_AusEst.aa.qual (no okalt): all and longest 1000 summary 
+okay.top	 n=1000; average=1979; median=1729; min,max=1362,8677; nfull=930; sum=1979769; gaps=0,0
+okay.all	 n=265743; average=102; median=62; min,max=30,8677; nfull=194197; sum=27205290; gaps=0,0
+#ta2c: ERR:output skip dup id TRINITY_GG_87339_c1_g1_i1_3314350 
+#readPubidTab(publicset/all_transcripts_AusEst.pubids)= 614089
+# nin=42049176, nok=1797915, nfrag=4245, nskipnotloc=39361313, nskipdupfrag=50123, nskipdiffloc=835580
+#insertUniqExons= 20952
+#collectExonChains= 608688 of 610542 ids
+#assignChainLoci
+#n_class: ichain=426515 icalt=163084 icsub=19089 icdup=1854
+#n_alts : t1=426515 t2=45572 t3=20104 t4=13374 t5=9985 t6=7769 t7=6179 t8=5006 t9=4184 t10=3530 t11=2996 t12=2539 t13=2207 t14=1918 t15=1685 t16=1493 t17=1327 t18=1197 t19=1085 t20=972
+2022-11-16 13:04:43 INFO:	***** Start a BUSCO v5.4.3 analysis, current time: 11/16/2022 13:04:43 *****
+2022-11-16 13:04:43 INFO:	Configuring BUSCO with local environment
+2022-11-16 13:04:43 INFO:	Mode is transcriptome
+2022-11-16 13:04:43 INFO:	Downloading information on latest versions of BUSCO data...
+2022-11-16 13:04:45 INFO:	Input file is /storage/homefs/jo20n766/trout_kidney_transcriptome/assembly/tr2aacds/Aus_Est_pHetero7/okayset/all_transcripts_AusEst.okay.primary.mrna
+2022-11-16 13:04:46 INFO:	Running BUSCO using lineage dataset actinopterygii_odb10 (eukaryota, 2021-02-19)
+2022-11-16 13:04:46 INFO:	Running 1 job(s) on metaeuk, starting at 11/16/2022 13:04:46
+2022-11-16 13:08:38 INFO:	[metaeuk]	1 of 1 task(s) completed
+2022-11-16 13:08:57 INFO:	***** Run HMMER on gene sequences *****
+2022-11-16 13:08:57 INFO:	Running 3640 job(s) on hmmsearch, starting at 11/16/2022 13:08:57
+2022-11-16 13:09:06 INFO:	[hmmsearch]	364 of 3640 task(s) completed
+2022-11-16 13:09:14 INFO:	[hmmsearch]	728 of 3640 task(s) completed
+2022-11-16 13:09:24 INFO:	[hmmsearch]	1092 of 3640 task(s) completed
+2022-11-16 13:09:46 INFO:	[hmmsearch]	1456 of 3640 task(s) completed
+2022-11-16 13:10:04 INFO:	[hmmsearch]	1820 of 3640 task(s) completed
+2022-11-16 13:10:22 INFO:	[hmmsearch]	2184 of 3640 task(s) completed
+2022-11-16 13:10:44 INFO:	[hmmsearch]	2548 of 3640 task(s) completed
+2022-11-16 13:10:57 INFO:	[hmmsearch]	2912 of 3640 task(s) completed
+2022-11-16 13:11:08 INFO:	[hmmsearch]	3276 of 3640 task(s) completed
+2022-11-16 13:11:26 INFO:	[hmmsearch]	3640 of 3640 task(s) completed
+2022-11-16 13:11:39 INFO:	Extracting missing and fragmented buscos from the file refseq_db.faa...
+2022-11-16 13:11:42 INFO:	Running 1 job(s) on metaeuk, starting at 11/16/2022 13:11:42
+2022-11-16 13:19:51 INFO:	[metaeuk]	1 of 1 task(s) completed
+2022-11-16 13:19:58 INFO:	***** Run HMMER on gene sequences *****
+2022-11-16 13:19:58 INFO:	Running 514 job(s) on hmmsearch, starting at 11/16/2022 13:19:58
+2022-11-16 13:20:05 INFO:	[hmmsearch]	52 of 514 task(s) completed
+2022-11-16 13:20:07 INFO:	[hmmsearch]	103 of 514 task(s) completed
+2022-11-16 13:20:09 INFO:	[hmmsearch]	155 of 514 task(s) completed
+2022-11-16 13:20:11 INFO:	[hmmsearch]	206 of 514 task(s) completed
+2022-11-16 13:20:13 INFO:	[hmmsearch]	257 of 514 task(s) completed
+2022-11-16 13:20:14 INFO:	[hmmsearch]	309 of 514 task(s) completed
+2022-11-16 13:20:16 INFO:	[hmmsearch]	360 of 514 task(s) completed
+2022-11-16 13:20:18 INFO:	[hmmsearch]	412 of 514 task(s) completed
+2022-11-16 13:20:20 INFO:	[hmmsearch]	463 of 514 task(s) completed
+2022-11-16 13:20:25 INFO:	[hmmsearch]	514 of 514 task(s) completed
+2022-11-16 13:21:07 INFO:	Results:	C:86.2%[S:80.2%,D:6.0%],F:2.6%,M:11.2%,n:3640	   
+
+2022-11-16 13:21:16 INFO:	
+
+	--------------------------------------------------
+	|Results from dataset actinopterygii_odb10        |
+	--------------------------------------------------
+	|C:86.2%[S:80.2%,D:6.0%],F:2.6%,M:11.2%,n:3640    |
+	|3136	Complete BUSCOs (C)                       |
+	|2919	Complete and single-copy BUSCOs (S)       |
+	|217	Complete and duplicated BUSCOs (D)        |
+	|96	Fragmented BUSCOs (F)                     |
+	|408	Missing BUSCOs (M)                        |
+	|3640	Total BUSCO groups searched               |
+	--------------------------------------------------
+2022-11-16 13:21:16 INFO:	BUSCO analysis done. Total running time: 991 seconds
+2022-11-16 13:21:16 INFO:	Results written in /storage/homefs/jo20n766/trout_kidney_transcriptome/assembly/tr2aacds/Aus_Est_pHetero7/busco_primaries
+2022-11-16 13:21:16 INFO:	For assistance with interpreting the results, please consult the userguide: https://busco.ezlab.org/busco_userguide.html
+
+2022-11-16 13:21:16 INFO:	Visit this page https://gitlab.com/ezlab/busco#how-to-cite-busco to see how to cite BUSCO
