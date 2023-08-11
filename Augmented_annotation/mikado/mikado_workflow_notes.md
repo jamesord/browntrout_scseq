@@ -11,7 +11,7 @@ Subsequently, three transcript assemblies were inputted to the Mikado workflow: 
 The following were then run:
 1) mikado_configure.sh
 2) mikado_prep.sh
-3) transdecoded.sh (run transdecoder on mikado_prepared.fasta)
+3) transdecoder.sh (run transdecoder on mikado_prepared.fasta)
 4) mikado_serialise.sh
 5) mikado_pick.sh
 6) mikado_compare.sh
