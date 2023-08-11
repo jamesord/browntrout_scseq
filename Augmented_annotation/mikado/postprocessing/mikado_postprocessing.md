@@ -1,4 +1,5 @@
 # Postprocessing of MIKADO transcripts
+James Ord | compiled 11/08/23
 The goal here was to extract only high quality, 'novel' (i.e. non-reference) transcripts from the Mikado output and convert the corresponding annotations into GTF files which can be simply appended to existing ENSEMBL gene annotations.
 The workflow is as follows:
 
