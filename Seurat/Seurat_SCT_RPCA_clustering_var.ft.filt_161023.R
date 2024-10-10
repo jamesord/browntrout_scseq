@@ -49,12 +49,14 @@ to_remove<-rbind(ccyc,hemos)
 
 # store mitochondrial percentage in object meta data
 gcdata <- PercentageFeatureSet(gcdata, pattern = "^MT-", col.name = "percent.mt")
+# NOTE (10/10/2024): this was not the correct way to store the % MT in this data; resulting variable was empty
 
 # the rest is following the example here:
 #https://satijalab.org/seurat/articles/integration_rpca.html#performing-integration-on-datasets-normalized-with-sctransform-1
 
 gcdata.list <- SplitObject(gcdata, split.by = "batch")
 gcdata.list <- lapply(X = gcdata.list, FUN = SCTransform, method = "glmGamPoi", vars.to.regress = c("percent.mt")) # vars.to.regress not in example
+# NOTE (10/10/2024): as percent.mt was empty, regressing on it would have done NOTHING. However this should not have adversely affected anything else.
 
 features <- SelectIntegrationFeatures(object.list = gcdata.list)
 gcdata.list <- PrepSCTIntegration(object.list = gcdata.list, anchor.features = features) #NOTE: subsets scale.data slot to only include anchor features
