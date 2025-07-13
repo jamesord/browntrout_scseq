@@ -7,41 +7,39 @@ library(Seurat)
 library(tidyr)
 library(gridExtra)
 library(forcats)
-library("ggrastr")
-library(biomaRt)
 
 # UPDATED 17/07/24
 
-load("C:/Users/James/Documents/R/trout_local/trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.downsamp.rds")
-DefaultAssay(immune.combined.sct.downsampled)<-"integrated"
+load("../trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.rds")
+DefaultAssay(immune.combined.sct)<-"integrated"
 
-levels(Idents(immune.combined.sct.downsampled))<-gsub("8.0","8",levels(Idents(immune.combined.sct.downsampled)))
-levels(Idents(immune.combined.sct.downsampled))<-gsub("10.0","10",levels(Idents(immune.combined.sct.downsampled)))
-levels(Idents(immune.combined.sct.downsampled))<-gsub("19.0","19",levels(Idents(immune.combined.sct.downsampled)))
+levels(Idents(immune.combined.sct))<-gsub("8.0","8",levels(Idents(immune.combined.sct)))
+levels(Idents(immune.combined.sct))<-gsub("10.0","10",levels(Idents(immune.combined.sct)))
+levels(Idents(immune.combined.sct))<-gsub("19.0","19",levels(Idents(immune.combined.sct)))
 
-fshmk_small<-read.table("cell_marker_compilation/fish_compilation/all_potential_markers_long_290124.txt",sep="\t",header=T)
-fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct.downsampled))
+fshmk_small<-read.table("all_potential_markers_long_290124.txt",sep="\t",header=T)
+fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct))
 
-clabs<-read.table("Seurat_cluster_ID/current/cluster_classifications_120724.txt",sep="\t",header=T)
+clabs<-read.table("cluster_classifications_120724.txt",sep="\t",header=T)
 colnames(clabs)[2]<-"ident"
 clabs$Group<-ifelse(clabs$Group=="Monocytes / Macrophages","Monocytes /\nMacrophages",clabs$Group) # for plotting purposes
 
-level_order<-levels(immune.combined.sct.downsampled)
+level_order<-levels(immune.combined.sct)
 clabs <- clabs[match(level_order, clabs$cluster), ]
 new.cluster.ids <- as.character(clabs$ident)
-names(new.cluster.ids) <- levels(immune.combined.sct.downsampled)
-immune.combined.sct.downsampled1 <- RenameIdents(immune.combined.sct.downsampled, new.cluster.ids)
+names(new.cluster.ids) <- levels(immune.combined.sct)
+immune.combined.sct1 <- RenameIdents(immune.combined.sct, new.cluster.ids)
 
 # Fig 1B UMAP
-UMAP1<-UMAPPlot(immune.combined.sct.downsampled1,cols=clabs$plot_colour,raster=T)+NoLegend()+ggtitle("B")+
+UMAP1<-UMAPPlot(immune.combined.sct1,cols=clabs$plot_colour,raster=T)+NoLegend()+ggtitle("B")+
   theme(plot.title = element_text(size=30,face = "plain"))
 # In order to display the label colours in the correct order, the UMAP1 dataframe itself needs to be sorted according to the identity (cluster name) factor level
-UMAP1$data$ident<-factor(UMAP1$data$ident,levels=levels(Idents(immune.combined.sct.downsampled1)))
+UMAP1$data$ident<-factor(UMAP1$data$ident,levels=levels(Idents(immune.combined.sct1)))
 UMAP1$data<-UMAP1$data[order(UMAP1$data$ident),]
 UMAP2<-LabelClusters(UMAP1, id = "ident", size = 4, repel = T,  box.padding = 1.5, box=T,color=clabs$label_text_colour, segment.color="black",max.overlaps=15)
 
 # Fig. 1C cell counts in clusters
-clustcounts<-read.table("Seurat_cluster_ID/current/cluster_individual_counts_subclusters_040224.txt",header=T,sep="\t")[c(1,5)] %>% distinct()
+clustcounts<-read.table("cluster_individual_counts_subclusters_040224.txt",header=T,sep="\t")[c(1,5)] %>% distinct()
 clustcounts<-merge(clustcounts,clabs,by="cluster")
 clustcounts$Shorthand <- factor(clustcounts$Shorthand,levels=clustcounts$Shorthand)
 clustcounts$ident <- factor(clustcounts$ident,levels=clustcounts$ident)
@@ -67,7 +65,7 @@ lay <- rbind(c(1,2),
 
 grobz <- lapply(list(blankplot,UMAP2,cplot), ggplotGrob)
 
-pdf("Figure1_UPDATED_170724.pdf", width = 20, height = 10)
+pdf("Figure1_FULL_170724.pdf", width = 20, height = 10)
 grid.arrange(grobs = grobz, layout_matrix = lay)
 dev.off()
 
@@ -75,40 +73,40 @@ dev.off()
 
 # Neutrophil markers
 nlevels(as.factor(subset(fshmk_small,primary_ct=="Neutrophils")$gene_id)) # 9 markers present
-immune.combined.sct.downsampled1<-AddModuleScore(object = immune.combined.sct.downsampled1,
+immune.combined.sct1<-AddModuleScore(object = immune.combined.sct1,
                                                  features = list(subset(fshmk_small,primary_ct=="Neutrophils")$gene_id),
                                                  ctrl = 10, name = 'Neutrophils')
-Nplot<-VlnPlot(immune.combined.sct.downsampled1,features="Neutrophils1")
+Nplot<-VlnPlot(immune.combined.sct1,features="Neutrophils1")
 Nplotdat<-merge(Nplot$data,clabs,by="ident")
 colnames(Nplotdat)[c(2)]<-"expression"
 Nplotdat$marker_group<-"Neutrophil markers\n(N=9)"
 
 # Macrophage markers
 nlevels(as.factor(subset(fshmk_small,primary_ct=="Macrophages"|primary_ct=="Monocytes")$gene_id)) # 7 markers present
-immune.combined.sct.downsampled1<-AddModuleScore(object = immune.combined.sct.downsampled1,
+immune.combined.sct1<-AddModuleScore(object = immune.combined.sct1,
                                                  features = list(subset(fshmk_small,primary_ct=="Macrophages"|primary_ct=="Monocytes")$gene_id),
                                                  ctrl = 10, name = 'Macrophages')
-Mplot<-VlnPlot(immune.combined.sct.downsampled1,features="Macrophages1")
+Mplot<-VlnPlot(immune.combined.sct1,features="Macrophages1")
 Mplotdat<-merge(Mplot$data,clabs,by="ident")
 colnames(Mplotdat)[c(2)]<-"expression"
 Mplotdat$marker_group<-"Monocyte / Macrophage\nmarkers (N=7)"
 
 #  T-cell markers
 nlevels(as.factor(subset(fshmk_small,primary_ct=="T-cells")$gene_id)) # 22 markers present
-immune.combined.sct.downsampled1<-AddModuleScore(object = immune.combined.sct.downsampled1,
+immune.combined.sct1<-AddModuleScore(object = immune.combined.sct1,
                                                  features = list(subset(fshmk_small,primary_ct=="T-cells")$gene_id),
                                                  ctrl = 10, name = 'T_cells')
-Tplot<-VlnPlot(immune.combined.sct.downsampled1,features="T_cells1")
+Tplot<-VlnPlot(immune.combined.sct1,features="T_cells1")
 Tplotdat<-merge(Tplot$data,clabs,by="ident")
 colnames(Tplotdat)[c(2)]<-"expression"
 Tplotdat$marker_group<-"T-cell markers\n(N=22)"
 
 # B-cell markers
 nlevels(as.factor(subset(fshmk_small,primary_ct=="B-cells")$gene_id)) # 12 markers present
-immune.combined.sct.downsampled1<-AddModuleScore(object = immune.combined.sct.downsampled1,
+immune.combined.sct1<-AddModuleScore(object = immune.combined.sct1,
                                                  features = list(subset(fshmk_small,primary_ct=="B-cells")$gene_id),
                                                  ctrl = 10, name = 'B_cells')
-Bplot<-VlnPlot(immune.combined.sct.downsampled1,features="B_cells1")
+Bplot<-VlnPlot(immune.combined.sct1,features="B_cells1")
 Bplotdat<-merge(Bplot$data,clabs,by="ident")
 colnames(Bplotdat)[c(2)]<-"expression"
 Bplotdat$marker_group<-"B-cell markers\n(N=12)"
@@ -130,7 +128,7 @@ allplot<-ggplot(allplotdat,aes(x=Shorthand,y=expression,fill=ident))+
   geom_hline(aes(yintercept=-Inf)) + 
   coord_cartesian(clip="off")
 
-pdf("Figure2_UPDATED_170724.pdf", width = 10, height = 8)
+pdf("Figure2_FULL_170724.pdf", width = 10, height = 8)
 allplot
 dev.off()
 

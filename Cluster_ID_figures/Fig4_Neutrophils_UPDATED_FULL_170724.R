@@ -1,7 +1,6 @@
 # NEUTROPHIL FIGURE UPDATED 170724
 
 library(dplyr)
-library(biomaRt)
 library(ggplot2)
 library(data.table)
 library(Seurat)
@@ -16,16 +15,16 @@ library(ggplotify)
 `%not_in%`<-Negate(`%in%`)
 
 # Load in dataset
-load("C:/Users/James/Documents/R/trout_local/trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.downsamp.rds")
-DefaultAssay(immune.combined.sct.downsampled)<-"integrated"
+load("../trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.rds")
+DefaultAssay(immune.combined.sct)<-"integrated"
 
 # read in clustermarker data
-clustmarkers<-read.delim("Seurat_cluster_ID/current/all_clustermarkers_annotated_180224.txt",header=T,sep="\t")%>%subset(avg_log2FC>=1)
-fshmk_small<-read.table("cell_marker_compilation/fish_compilation/all_potential_markers_long_290124.txt",sep="\t",header=T)
-fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct.downsampled))
+clustmarkers<-read.delim("all_clustermarkers_annotated_180224.txt",header=T,sep="\t")%>%subset(avg_log2FC>=1)
+fshmk_small<-read.table("all_potential_markers_long_290124.txt",sep="\t",header=T)
+fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct))
 
 # read in cluster labels
-clabs<-read.table("Seurat_cluster_ID/current/cluster_classifications_120724.txt",sep="\t",header=T)
+clabs<-read.table("cluster_classifications_120724.txt",sep="\t",header=T)
 clustmarkers<-merge(clustmarkers,clabs[c(1:3)],by="cluster")
 
 # keep one version with all clustermarkers
@@ -134,13 +133,13 @@ distinct(Ncells[c(13,1,8,9,14,3,4,5)]) %>% add_count(gene_id) %>%
   subset(nn==4)%>%distinct(gene_id,name_or_symbol,description)
 
 # gpx1b,taldo1 (x2), and PLAC8-like mark these lower clusters
-p10<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000017863",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p10<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000017863",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank(),axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="gpx1b",subtitle="ENSSTUG00000017863 | N1-3,N5")
 
 # taldo1 is involved with oxidative burst in neutrophils https://www.nature.com/articles/s42255-022-00550-8
-p11<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000044076",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p11<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000044076",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank(),axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="taldo1",subtitle="ENSSTUG00000044076 | N1-3,N5")
@@ -150,7 +149,7 @@ distinct(Ncells[c(13,1,8,9,14,3,4,5)]) %>% add_count(gene_id) %>%
   subset(n==4&(Shorthand=="N1"|Shorthand=="N2"|Shorthand=="N5"|Shorthand=="N6"))%>%
   add_count(gene_id)%>% subset(nn==4)%>%distinct(gene_id,name_or_symbol,description)
 
-p12<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000007163",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p12<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000007163",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   labs(title="mpx*",subtitle="ENSSTUG00000007163 | N1,N2,N5,N6",x="",y="")+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank(),axis.line.y = element_blank())+
@@ -167,7 +166,7 @@ mean(subset(cN12,Shorthand=="N1")$avg_log2FC)-mean(subset(cN12,Shorthand=="N2")$
 
 # transkelotase; see this paper also referring to taldo1 https://www.nature.com/articles/s42255-022-00550-8
 # expression throughout N2
-p13<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000007986",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p13<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000007986",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.y = element_blank())+theme(axis.line.x = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="tktb",subtitle="ENSSTUG00000007986 | N1,N2")
@@ -176,12 +175,12 @@ p13<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000007986",m
 # https://www.cell.com/cell-metabolism/pdfExtended/S1550-4131(20)30651-3
 # https://www.nature.com/articles/s42255-022-00550-8
 # expression throughout N2
-p14<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000010287",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p14<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000010287",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank(),axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="FBP1-like",subtitle="ENSSTUG00000010287 | N1,N2")
 # alox5ap = expression throughout N2
-p15<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000012256",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p15<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000012256",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank(),axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="alox5ap",subtitle="ENSSTUG00000012256 | N1,N2")
@@ -198,7 +197,7 @@ F4C<-as.ggplot(grid.arrange(p10,p11,p12,p13,p14,p15,nrow=3,top=textGrob("C", x =
 ##############################################################
 
 # ONLY HCE SHARED BY ALL UPPER CLUSTERS INCLUDING N6!
-p1<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000011854",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p1<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000011854",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   labs(title="HCE1-like*",subtitle="ENSSTUG00000011854 | N2-6",x="",y="")+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank(),axis.line.y = element_blank())+
@@ -207,7 +206,7 @@ p1<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000011854",mi
 # Check also the one shared by N2-4
 # tmsb1,CFD-like (x2),CPA1,
 
-p2<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000045318",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p2<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000045318",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   labs(title="CFD-like",subtitle="ENSSTUG00000045318 | N2-5",x="",y="")+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
@@ -216,14 +215,14 @@ p2<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000045318",mi
 # Note however that the other homolog ENSSTUG00000009474 shows slightly stronger expression in N3
 # NOTE complement factor D has been shown to inhibit degranulation:
 # https://pubmed.ncbi.nlm.nih.gov/7556615/
-p3<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000021190",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p3<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000021190",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   labs(title="cpa1*",subtitle="ENSSTUG00000021190 | N2-5",x="",y="")+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())
 
 # beta thymosin 1
-p4<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000006838",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p4<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000006838",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   labs(title="tmsb1",subtitle="ENSSTUG00000006838 | N2-5",x="",y="")+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
@@ -234,20 +233,20 @@ p4<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000006838",mi
 # other markers specific to upper clusters
 
 # N2: npdc1a --> a gene associated with neural tissue
-p5<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000039310",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p5<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000039310",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   labs(title="npdc1a",subtitle="ENSSTUG00000039310 | N2\nN1,N2 (<60%)",x="",y="")+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())
 
 # N2: kcnq5a potassium voltage-gated channel subfamily KQT member 5-like
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000025248",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000025248",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   labs(title="kcnq5a",subtitle="N2",x="",y="")+
 #   theme(plot.title = element_text(hjust = 0))+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())
 
 # N4: unnamed gene, scattered expression
-p6<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000030567",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p6<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000030567",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   labs(title="unnamed IG-like",subtitle="ENSSTUG00000030567 | N4\nN2,N3,N5 (<60%)",x="",y="")+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
@@ -271,19 +270,19 @@ c1ms <- c1ms[order(-c1ms$avg_log2FC),]
 # the top ones are enzymes, specifically metalloproteinases.
 
 # We would have mmp9, GADL1, adam28 (another metalloprotease)
-p7<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000015832",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p7<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000015832",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   labs(title="mmp9*",subtitle="ENSSTUG00000015832 | N1",x="",y="")+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.text = element_blank(), axis.ticks = element_blank())
 # NOTE that collagenase 3-like (MMP13) has very similar expression
 # acidic amino acid decarboxylase GADL1-like
-p8<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000019948",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p8<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000019948",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="GADL1",subtitle="ENSSTUG00000019948 | N1")
 # adam28: another metalloprotease. In humans this gene is expressed largely in B-cells as well as basophils and eosinophils (see protein atlas)
-p9<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000002143",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p9<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000002143",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="adam28",subtitle="ENSSTUG00000002143 | N1")
@@ -297,7 +296,7 @@ F4E<-as.ggplot(grid.arrange(p7,p8,p9,ncol=1,top=textGrob("E", x = 0, hjust = 0,g
 # SUMMARY UMAP FIGURE #
 #######################
 
-uplot<-UMAPPlot(immune.combined.sct.downsampled)
+uplot<-UMAPPlot(immune.combined.sct)
 uplotdat<-uplot$data
 colnames(uplotdat)[3]<-"cluster"
 # need to manually alter some numbers for compatibility
@@ -336,7 +335,7 @@ lay <- rbind(c(1,1,2,2,2),
 
 grobz <- lapply(list(F4A,F4B,F4C,F4D,F4E), ggplotGrob)
 
-pdf("Figure4_UPDATED_170724.pdf", width = 19, height = 19)
+pdf("Figure4_UPDATED_FULL_170724.pdf", width = 19, height = 19)
 grid.arrange(grobs = grobz, layout_matrix = lay)
 dev.off()
 

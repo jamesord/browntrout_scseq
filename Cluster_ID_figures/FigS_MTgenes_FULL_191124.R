@@ -6,30 +6,28 @@ library(Seurat)
 library(tidyr)
 library(gridExtra)
 library(forcats)
-library("ggrastr")
-library(biomaRt)
 
-load("C:/Users/James/Documents/R/trout_local/trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.downsamp.rds")
-DefaultAssay(immune.combined.sct.downsampled)<-"integrated"
+load("../trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.rds")
+DefaultAssay(immune.combined.sct)<-"integrated"
 
-levels(Idents(immune.combined.sct.downsampled))<-gsub("8.0","8",levels(Idents(immune.combined.sct.downsampled)))
-levels(Idents(immune.combined.sct.downsampled))<-gsub("10.0","10",levels(Idents(immune.combined.sct.downsampled)))
-levels(Idents(immune.combined.sct.downsampled))<-gsub("19.0","19",levels(Idents(immune.combined.sct.downsampled)))
+levels(Idents(immune.combined.sct))<-gsub("8.0","8",levels(Idents(immune.combined.sct)))
+levels(Idents(immune.combined.sct))<-gsub("10.0","10",levels(Idents(immune.combined.sct)))
+levels(Idents(immune.combined.sct))<-gsub("19.0","19",levels(Idents(immune.combined.sct)))
 
-clabs<-read.table("Seurat_cluster_ID/current/cluster_classifications_120724.txt",sep="\t",header=T)
+clabs<-read.table("cluster_classifications_120724.txt",sep="\t",header=T)
 colnames(clabs)[2]<-"ident"
 clabs$Group<-ifelse(clabs$Group=="Monocytes / Macrophages","Monocytes /\nMacrophages",clabs$Group) # for plotting purposes
 
-level_order<-levels(immune.combined.sct.downsampled)
+level_order<-levels(immune.combined.sct)
 clabs <- clabs[match(level_order, clabs$cluster), ]
 new.cluster.ids <- as.character(clabs$ident)
-names(new.cluster.ids) <- levels(immune.combined.sct.downsampled)
-immune.combined.sct.downsampled1 <- RenameIdents(immune.combined.sct.downsampled, new.cluster.ids)
+names(new.cluster.ids) <- levels(immune.combined.sct)
+immune.combined.sct1 <- RenameIdents(immune.combined.sct, new.cluster.ids)
 
 # MT markers
-mtgenes<-read.table("misc/mitochondiral_gene_ENSEMBL_IDs.txt")
+mtgenes<-read.table("mitochondiral_gene_ENSEMBL_IDs.txt")
 # add module for MT genes
-immune.combined.sct.downsampled<-AddModuleScore(object = immune.combined.sct.downsampled1,
+immune.combined.sct<-AddModuleScore(object = immune.combined.sct1,
                                                 features = list(mtgenes$V1),
                                                 ctrl = 10, name = 'MT')
 # Warning: The following features are not present in the object: ENSSTUG00000000007, ENSSTUG00000000022,
@@ -37,9 +35,9 @@ immune.combined.sct.downsampled<-AddModuleScore(object = immune.combined.sct.dow
 # not searching for symbol synonyms
 
 # generate base plots
-MTplot<-VlnPlot(immune.combined.sct.downsampled,features="MT1")
-nftplot<-VlnPlot(immune.combined.sct.downsampled,features="nFeature_RNA")
-nctplot<-VlnPlot(immune.combined.sct.downsampled,features="nCount_RNA")
+MTplot<-VlnPlot(immune.combined.sct,features="MT1")
+nftplot<-VlnPlot(immune.combined.sct,features="nFeature_RNA")
+nctplot<-VlnPlot(immune.combined.sct,features="nCount_RNA")
 
 # nice plot of MT gene module
 MTplotdat<-merge(MTplot$data,clabs,by="ident")
@@ -88,6 +86,6 @@ nctplot<-ggplot(nctplotdat,aes(x=Shorthand,y=log(n_count_RNA),fill=ident))+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   facet_grid(.~Group,scales="free_x",space="free")
 
-pdf("FigureS_MT_DRAFT_191124.pdf", width = 10, height = 9)
+pdf("FigureS_MT_FULL_191124.pdf", width = 10, height = 9)
 grid.arrange(MTplot,nftplot,nctplot,ncol=1)
 dev.off()

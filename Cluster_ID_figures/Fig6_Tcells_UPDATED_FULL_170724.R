@@ -1,7 +1,6 @@
 # FIGURE 6 T-CELLS UPDATED 170724
 #getwd()
 library(dplyr)
-library(biomaRt)
 library(ggplot2)
 library(data.table)
 library(Seurat)
@@ -16,16 +15,16 @@ library(ggplotify)
 `%not_in%`<-Negate(`%in%`)
 
 # Load in dataset
-load("C:/Users/James/Documents/R/trout_local/trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.downsamp.rds")
-DefaultAssay(immune.combined.sct.downsampled)<-"integrated"
+load("../trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.rds")
+DefaultAssay(immune.combined.sct)<-"integrated"
 
 # read in clustermarker data
-clustmarkers<-read.delim("Seurat_cluster_ID/current/all_clustermarkers_annotated_180224.txt",header=T,sep="\t")%>%subset(avg_log2FC>=1)
-fshmk_small<-read.table("cell_marker_compilation/fish_compilation/all_potential_markers_long_290124.txt",sep="\t",header=T)
-fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct.downsampled))
+clustmarkers<-read.delim("all_clustermarkers_annotated_180224.txt",header=T,sep="\t")%>%subset(avg_log2FC>=1)
+fshmk_small<-read.table("all_potential_markers_long_290124.txt",sep="\t",header=T)
+fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct))
 
 # read in cluster labels
-clabs<-read.table("Seurat_cluster_ID/current/cluster_classifications_120724.txt",sep="\t",header=T)
+clabs<-read.table("cluster_classifications_120724.txt",sep="\t",header=T)
 clustmarkers<-merge(clustmarkers,clabs[c(1:3)],by="cluster")
 
 # keep one version with all clustermarkers
@@ -97,11 +96,11 @@ write.table(Tcellsagg,file="Tcell_markers.tsv",sep="\t",row.names = F,col.names 
 # two genes are shared between six:
 # CD3E and TRBC1 TCR beta constant 1
 
-p1<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000020148",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p1<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000020148",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="CD3E-like*",subtitle="ENSSTUG00000020148 | T1-6")
-p2<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000037152",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p2<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000037152",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="TRBC1-like*",subtitle="ENSSTUG00000037152 | T1-6")
@@ -111,25 +110,25 @@ p2<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000037152",mi
 
 # STK10-like
 # "negatively regulate interleukin 2 expression in T-cells" (Wiki)
-p3<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000008344",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p3<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000008344",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="STK10-like",subtitle="ENSSTUG00000008344 | T1,T2,T4-6\nT3 (<60%)")
 
 # def6b: human homolog has role in T-cells (https://www.nature.com/articles/s41467-019-10812-x)
-p4<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000033778",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p4<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000033778",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="def6b",subtitle="ENSSTUG00000033778 | T1,T2,T4-6\nT3 (<60%)")
 
 # il7r (interleukin 7 receptor)
-p5<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000036602",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p5<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000036602",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="il7r",subtitle="ENSSTUG00000036602 | T1,T3-6\nT2 (<60%)")
 
 # sh2d1ab: involved in SLAM signalling (in turn involved in T-cell proliferation) (Wiki)
-p6<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000037504",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p6<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000037504",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="sh2d1ab",subtitle="ENSSTUG00000037504 | T1-4,T6")
@@ -140,7 +139,7 @@ F6C<-as.ggplot(grid.arrange(p1,p2,p3,p4,p5,p6,nrow=3,top=textGrob("B", x = 0, hj
 
 # honorable mention: fynb
 # fynb: fyn is associated with T-cell signalling (Wiki)
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000037621",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000037621",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+
 #   #theme(axis.line.x = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="fynb",subtitle="T1,T2,T4-6\nT3 (<60%)")
@@ -152,44 +151,44 @@ F6C<-as.ggplot(grid.arrange(p1,p2,p3,p4,p5,p6,nrow=3,top=textGrob("B", x = 0, hj
 # See again Tcellsagg: markers that are specific to certain clusters both with and without high abundance filtering were prioritised
 
 # cd4-2b: T4 high abundance, two others low abundance
-p7<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000002855",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p7<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000002855",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="cd4-2b*",subtitle="ENSSTUG00000002855 | T4\nT3,T4,T6 (<60%)")
 
 # CD28: T4 high abundance, T6 low abundance
-p8<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000013913",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p8<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000013913",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="cd28*",subtitle="ENSSTUG00000013913 | T4\nT6 (<60%)")
 
 # another cd28-like
-p9<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000006325",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p9<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000006325",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="CD28-like*",subtitle="ENSSTUG00000006325 | T1,T4,T6\nT2,T3 (<60%)")
 
 # CD5-like
-p10<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000043767",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p10<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000043767",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="CD5-like*",subtitle="ENSSTUG00000043767 | T1,T4,T6\nT3,T5 (<60%)")
 
 # CD8A: T1 high abundance, two others low abundance
-p11<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000018765",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p11<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000018765",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="cd8a*",subtitle="ENSSTUG00000018765 | T1\nT3,T6 (<60%)")
 # MENTION ALSO CD8B (same expression pattern)
 
 # CD2-like: T5 high abundance, two others low abundance
-p12<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000007876",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p12<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000007876",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="CD2-like*",subtitle="ENSSTUG00000007876 | T5\nT1,T6 (<60%)")
 
 # ilr2b: T2 and T5 high abundance
-p13<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000015644",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p13<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000015644",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="il2rb",subtitle="ENSSTUG00000015644 | T2,T5")
@@ -197,7 +196,7 @@ p13<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000015644",m
 # ("promotes the differentiation of T cells into effector T cells and into memory T cells")
 
 # SLAM5-like: T5  only
-p14<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000014088",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p14<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000014088",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="SLAM5-like",subtitle="ENSSTUG00000014088 | T5")
@@ -205,7 +204,7 @@ p14<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000014088",m
 
 # plk3 is high abundance exclusively in T2, but is expressed at low abundance in all other clusters
 # not so good
-p15<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000015614",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p15<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000015614",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="plk3",subtitle="ENSSTUG00000015614 | T2\nT1,T3-6 (<60%)")
@@ -217,25 +216,25 @@ F6D<-as.ggplot(grid.arrange(p7,p8,p9,p10,p11,p12,p13,p14,p15,nrow=3,top=textGrob
 # Also of interest, but not plotted:
 
 # # unnamed CCL3-like: T5 high abundance, T2 low abundance
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000005355",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000005355",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+
 #   #theme(axis.line.x = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="unnamed CCL3-like",subtitle="ENSSTUG00000005355 | T5\nT2 (<60%)")
 
 # # unnamed IGSF3-like: T5 only
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000006882",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000006882",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+
 #   #theme(axis.line.x = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="unnamed IGSF3-like",subtitle="ENSSTUG00000006882 | T5")
 
 # # dnase1l4.1: T5 only
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000017594",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000017594",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+
 #   #theme(axis.line.x = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="dnase1l4.1",subtitle="T5")
 
 # # TCF7: T-cell marker expressed at high abundance in T3 but also others
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000002790",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000002790",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+
 #   #theme(axis.line.x = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="TCF7-like",subtitle="T1,T3,T4,T6\nT2,T5 (<60%)")
@@ -245,7 +244,7 @@ F6D<-as.ggplot(grid.arrange(p7,p8,p9,p10,p11,p12,p13,p14,p15,nrow=3,top=textGrob
 ###################
 
 ## SUMMARY UMAP FIGURE
-uplot<-UMAPPlot(immune.combined.sct.downsampled)
+uplot<-UMAPPlot(immune.combined.sct)
 uplotdat<-uplot$data
 colnames(uplotdat)[3]<-"cluster"
 # need to manually alter some numbers for compatibility
@@ -293,7 +292,7 @@ lay <- rbind(c(1,1,2,2,2),
 
 grobz <- lapply(list(F6A,F6B,F6C,F6D), ggplotGrob)
 
-pdf("Figure6_UPDATED_170724.pdf", width = 19, height = 19)
+pdf("Figure6_UPDATED_FULL_170724.pdf", width = 19, height = 19)
 grid.arrange(grobs = grobz, layout_matrix = lay)
 dev.off()
 

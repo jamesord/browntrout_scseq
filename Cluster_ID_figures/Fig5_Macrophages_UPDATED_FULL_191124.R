@@ -1,4 +1,4 @@
-# Macrophages / Monocytes figure UPDATED 141124
+# Macrophages / Monocytes figure UPDATED 191124
 
 library(dplyr)
 library(biomaRt)
@@ -16,16 +16,16 @@ library(ggplotify)
 `%not_in%`<-Negate(`%in%`)
 
 # Load in dataset
-load("C:/Users/James/Documents/R/trout_local/trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.downsamp.rds")
-DefaultAssay(immune.combined.sct.downsampled)<-"integrated"
+load("../trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.rds")
+DefaultAssay(immune.combined.sct)<-"integrated"
 
 # read in clustermarker data
-clustmarkers<-read.delim("Seurat_cluster_ID/current/all_clustermarkers_annotated_180224.txt",header=T,sep="\t")%>%subset(avg_log2FC>=1)
-fshmk_small<-read.table("cell_marker_compilation/fish_compilation/all_potential_markers_long_290124.txt",sep="\t",header=T)
-fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct.downsampled))
+clustmarkers<-read.delim("all_clustermarkers_annotated_180224.txt",header=T,sep="\t")%>%subset(avg_log2FC>=1)
+fshmk_small<-read.table("all_potential_markers_long_290124.txt",sep="\t",header=T)
+fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct))
 
 # read in cluster labels
-clabs<-read.table("Seurat_cluster_ID/current/cluster_classifications_120724.txt",sep="\t",header=T)
+clabs<-read.table("cluster_classifications_120724.txt",sep="\t",header=T)
 clustmarkers<-merge(clustmarkers,clabs[c(1:3)],by="cluster")
 
 # keep one version with all clustermarkers
@@ -46,8 +46,8 @@ subset(clustmarkers,gene_id%in%subset(fshmk_small,primary_ct=="APCs")$gene_id)%>
 
 # NOTE THAT CD74 IS A MONOCYTE MARKER IN ZEBRAFISH:
 # https://pubmed.ncbi.nlm.nih.gov/29229905/ https://pubmed.ncbi.nlm.nih.gov/35027916/
-FeaturePlot(immune.combined.sct.downsampled,feature="ENSSTUG00000008754",min.cutoff = "q10", max.cutoff = "q90",raster=T)
-FeaturePlot(immune.combined.sct.downsampled,feature="ENSSTUG00000006024",min.cutoff = "q10", max.cutoff = "q90",raster=T)
+FeaturePlot(immune.combined.sct,feature="ENSSTUG00000008754",min.cutoff = "q10", max.cutoff = "q90",raster=T)
+FeaturePlot(immune.combined.sct,feature="ENSSTUG00000006024",min.cutoff = "q10", max.cutoff = "q90",raster=T)
 
 ##################
 # 5B) UPSET PLOT #
@@ -108,7 +108,7 @@ nrow(Mcells2[!duplicated(Mcells$gene_id),])
 # https://en.wikipedia.org/wiki/Complement_component_1q
 # very highly expressed in macrophages: https://www.proteinatlas.org/ENSG00000159189-C1QC/single+cell+type
 # also some in M2
-p1<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000022041",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p1<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000022041",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="c1qa",subtitle="ENSSTUG00000022041 | M1,M3\nM2 (<60%)")
@@ -117,7 +117,7 @@ p1<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000022041",mi
 
 # olfactomectin: 38% in M2
 # facilitates cell adhesion (wiki) --> also expressed in M2 (MARKER at 38%)
-p2<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000007928",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p2<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000007928",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="OLFM4-like",subtitle="ENSSTUG00000007928 | M1,M3\nM2 (<60%)")
@@ -127,19 +127,19 @@ p2<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000007928",mi
 # SEE ALSO HIGH ABUNDANCE MARKERS OF M1 THAT ARE LOW ABUNDANCE MARKERS OF OTHER CLUSTERS
 # MPEG1 # note also a marker of M2,3,and 4 but <60% (53-57%)
 # is clearly pan-macrophage
-p3<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000031848",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p3<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000031848",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="MPEG1*",subtitle="ENSSTUG00000031848 | M1\nM2,M3,M4 (<60%)")
 # bactericidal permeability-increasing protein-like --> also in M3 at 36%
-p4<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000001658",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p4<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000001658",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="BPI-like",subtitle="ENSSTUG00000001658 | M1\nM3 (<60%)")
 
 # See also:
 # # CD22-like 41% in M2
-# FeaturePlot(immune.combined.sct.downsampled,features="mikado.1G2286",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="mikado.1G2286",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
 #   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="CD22-like",subtitle="mikado.1G2286 | M1\nM2 (<60%)")
@@ -147,7 +147,7 @@ p4<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000001658",mi
 # Not representative (low abundance in other clusters)
 # # keratin, cytoskeletal 18-like
 # # https://www.uniprot.org/uniprotkb/P05783/entry
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000044613",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000044613",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
 #   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="K1C18-like",subtitle="ENSSTUG00000044613 | M1\nM3,M4 (<60%)")
@@ -159,14 +159,14 @@ F5C<-as.ggplot(grid.arrange(p1,p2,p3,p4,nrow=2,top=textGrob("C", x = 0, hjust = 
 
 # MENTION BUT DON'T PLOT?
 # high affinity immunoglobulin gamma Fc receptor I-like: found on surface of macrophages and other immune cells --> M1 and M3
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000008409",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000008409",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="FCGR1A-like",subtitle="M1\nM3 (<60%)")
 # specific to macrophages in mice:
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4890338/
 
 # receptor-type tyrosine-protein phosphatase S-like --> expression similar to above CD22-like
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000024661",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000024661",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="ptprsa",subtitle="M1\nM2 (<60%)")
 
@@ -181,12 +181,12 @@ F5C<-as.ggplot(grid.arrange(p1,p2,p3,p4,nrow=2,top=textGrob("C", x = 0, hjust = 
 
 # the following were found to be highly specific to M1:
 # M1 expresses lots of keratin --> also in M3 and 4 but basically unique to M1
-p5<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000044613",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p5<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000044613",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="KRT18-like",subtitle="ENSSTUG00000044613 | M1\nM3,M4 (<60%)")
 # macrophage mannose receptor 1 (CD206)
-p6<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000033316",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p6<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000033316",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="CD206-like*",subtitle="ENSSTUG00000033316 | M1")
@@ -195,14 +195,14 @@ p6<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000033316",mi
 # FCGR1-like (high affinity immunoglobulin gamma Fc receptor)
 # Mediates IgG effector functions on monocytes triggering antibody-dependent cellular cytotoxicity (ADCC) of virus-infected cells
 # https://www.uniprot.org/uniprotkb/P12314/entry
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000008409",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000008409",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
 #   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="FCGR1-like",subtitle="ENSSTUG00000008409 | M1\nM3 (<60%)")
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3963702/
 
 # s100a10a --> marker of M1
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000042289",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000042289",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
 #   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="s100a10a",subtitle="ENSSTUG00000042289 | M1")
@@ -215,18 +215,18 @@ p6<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000033316",mi
 distinct(Mcells[c(13,1,8,9,14)]) %>% add_count(gene_id) %>% subset(n==1&Shorthand=="M3")
 # only two
 # fatty acid binding protein 7
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000013745",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000013745",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
 #   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="FABP7",subtitle="ENSSTUG00000013745 | M3")
 # # ependymin-like: # a glycoprotein https://en.wikipedia.org/wiki/Ependymin
 # # note it also seems to be in M2 but not a marker
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000013542",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000013542",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
 #   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="epdl1",subtitle="ENSSTUG00000013542 | M3")
 # NOTE that M3 also expressed MARCO as a marker in low abundance (55%) --> note also some expression in part of M2
-p7<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000016758",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p7<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000016758",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="MARCO*",subtitle="ENSSTUG00000013542\nM3 (<60%)")
@@ -236,7 +236,7 @@ p7<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000016758",mi
 # M4
 distinct(Mcells[c(13,1,8,9,14)]) %>% add_count(gene_id) %>% subset(n==1&Shorthand=="M4")
 # just one
-p8<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000013713",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p8<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000013713",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="flt3",subtitle="ENSSTUG00000013713 | M4")
@@ -248,13 +248,13 @@ p8<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000013713",mi
 # M5
 distinct(Mcells[c(13,1,8,9,14)]) %>% add_count(gene_id) %>% subset(n==1&Shorthand=="M5")
 # just one --> complement factor d
-p9<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000040640",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p9<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000040640",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="cfd",subtitle="ENSSTUG00000040640 | M5")
 # M5 low abundance
 # mrc1a is macrophage marker (54%)
-p10<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000000974",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p10<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000000974",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="mrc1a*",subtitle="ENSSTUG00000000974\nM5 (<60%)")
@@ -267,7 +267,7 @@ F5D<-as.ggplot(grid.arrange(p5,p6,p7,p8,p9,p10,nrow=2,top=textGrob("D", x = 0, h
 # SUMMARY UMAP FIGURE #
 #######################
 
-uplot<-UMAPPlot(immune.combined.sct.downsampled)
+uplot<-UMAPPlot(immune.combined.sct)
 uplotdat<-uplot$data
 colnames(uplotdat)[3]<-"cluster"
 # need to manually alter some numbers for compatibility
@@ -306,11 +306,11 @@ F5A<-as.ggplot(grid.arrange(Mumap,top=textGrob("A", x = 0, hjust = 0,gp=gpar(cex
 
 nlevels(as.factor(subset(fshmk_small,primary_ct=="APCs")$gene_id)) # 5 APC markers present in the data
 # Add APC marker module score
-immune.combined.sct.downsampled<-AddModuleScore(object = immune.combined.sct.downsampled,
+immune.combined.sct<-AddModuleScore(object = immune.combined.sct,
                                                  features = list(subset(fshmk_small,primary_ct=="APCs")$gene_id),
                                                  ctrl = 10, name = 'APCs')
 # make initial violin plot --> we will grab the data from the object
-Aplot<-VlnPlot(immune.combined.sct.downsampled,features="APCs1")
+Aplot<-VlnPlot(immune.combined.sct,features="APCs1")
 
 # rename cluster column in clabs for merging purposes
 colnames(clabs)[1]<-"ident"
@@ -352,15 +352,13 @@ lay <- rbind(c(1,1,2,2,2),
              c(3,3,4,4,4),
              c(3,3,4,4,4),
              c(3,3,4,4,4),
-             c(3,3,4,4,4),
-             c(3,3,4,4,4),
              c(5,5,5,5,5),
              c(5,5,5,5,5),
              c(5,5,5,5,5))
 
 grobz <- lapply(list(F5A,F5B,F5C,F5D,F5E), ggplotGrob)
 
-pdf("Figure5_UPDATED_141124.pdf", width = 20, height = 25)
+pdf("Figure5_UPDATED_FULL_191124.pdf", width = 20, height = 20)
 grid.arrange(grobs = grobz, layout_matrix = lay)
 dev.off()
 

@@ -1,8 +1,7 @@
-# FIGURE 7 B-CELLS UPDATED 14/11/24
+# FIGURE 7 B-CELLS UPDATED 17/07/24
 # Updated 14/11/24: The code was changed to allow NA2 markers among unique Bcell markers (i.e. DO NOT exclude NA2 markers when filtering for uniqueness)
 # However, this did not change the number of unique Bcell markers, so there is no need to regenerate the figures
 library(dplyr)
-library(biomaRt)
 library(ggplot2)
 library(data.table)
 library(Seurat)
@@ -17,16 +16,16 @@ library(ggplotify)
 `%not_in%`<-Negate(`%in%`)
 
 # Load in dataset
-load("C:/Users/James/Documents/R/trout_local/trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.downsamp.rds")
-DefaultAssay(immune.combined.sct.downsampled)<-"integrated"
+load("../trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.rds")
+DefaultAssay(immune.combined.sct)<-"integrated"
 
 # read in clustermarker data
-clustmarkers<-read.delim("Seurat_cluster_ID/current/all_clustermarkers_annotated_180224.txt",header=T,sep="\t")%>%subset(avg_log2FC>=1)
-fshmk_small<-read.table("cell_marker_compilation/fish_compilation/all_potential_markers_long_290124.txt",sep="\t",header=T)
-fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct.downsampled))
+clustmarkers<-read.delim("all_clustermarkers_annotated_180224.txt",header=T,sep="\t")%>%subset(avg_log2FC>=1)
+fshmk_small<-read.table("all_potential_markers_long_290124.txt",sep="\t",header=T)
+fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct))
 
 # read in cluster labels
-clabs<-read.table("Seurat_cluster_ID/current/cluster_classifications_120724.txt",sep="\t",header=T)
+clabs<-read.table("cluster_classifications_120724.txt",sep="\t",header=T)
 clustmarkers<-merge(clustmarkers,clabs[c(1:3)],by="cluster")
 
 # keep one version with all clustermarkers
@@ -50,8 +49,10 @@ subset(clustmarkers,gene_id%in%subset(fshmk_small,primary_ct=="B-cells")$gene_id
 
 Bcells<-subset(clustmarkers,Shorthand%like%"B"&Shorthand!="RBC")
 # subset for those NOT markers of other clusters (EVEN THOSE <60%! THIS IS VERY STRINGENT!)
-# also NOTE that we exclude 23 from the exclusion (if that makes sense) because it is an ambiguous cluster with both Bcell and Neutrophil markers
+# 14/11/24 also NOTE that we exclude 23 from the exclusion (if that makes sense) because it is an ambiguous cluster with both Bcell and Neutrophil markers
+# 14/11/24 However this does not affect the number of unique Bcell markers, (remains at 113), so the figure was not regenerated.
 Bcells<-subset(Bcells,gene_id%not_in%subset(clustmarkers_all,cluster%not_in%Bcells$cluster&cluster!=23)$gene_id) 
+Bcells<-subset(Bcells,gene_id%not_in%subset(clustmarkers_all,cluster%not_in%Bcells$cluster)$gene_id) 
 # some rows are duplicated as genes can be markers of lineage or, e.g. antigen presenting cells:
 Bcells<-merge(distinct(Bcells[-c(10)]),(aggregate(primary_ct~gene_id, fshmk_small, FUN=toString)),by="gene_id",all.x=T) # add aggregated primary_ct column
 nrow(Bcells[!duplicated(Bcells$gene_id),])
@@ -101,23 +102,23 @@ write.table(Bcellsagg,file="Bcell_markers.tsv",sep="\t",row.names = F,col.names 
 # mef2cb ENSSTUG00000006634: B1, B2, B3, B4, B5, B6 (required for B-cell prolif..see: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2518613/)
 
 # NOTE: Immunoglobulins to be plotted separately later
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000010446",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000010446",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+
 #   theme(axis.line.x = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="unnamed IGHM-like*",subtitle="ENSSTUG00000010446 | B1,B2,B4-7")
 # reduced IGHM in B1 and B2, absence in B3
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000027283",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000027283",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+
 #   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="unnamed IGKC1-like*",subtitle="ENSSTUG00000027283 | B1,B2,B4-7")
 # reduced IGKC1 in B1 and B2, absence in B3
 
 # CD79 A and B
-p1<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000031393",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p1<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000031393",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="cd79a*",subtitle="ENSSTUG00000031393 | B1-6")
-p2<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000027061",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p2<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000027061",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="cd79b*",subtitle="ENSSTUG00000027061 | B1,B3-6")
@@ -130,19 +131,19 @@ p2<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000027061",mi
 # scattered expression throughout B1-6
 # involved in cell proliferation: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6496359/
 # HIPK1 is needed for the function of certain B-cell types in mice: https://pubmed.ncbi.nlm.nih.gov/22545114/
-p3<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000017457",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p3<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000017457",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="hipk2",subtitle="ENSSTUG00000017457 | B3-6\nB1,B2 (<60%)")
 # erythrocyte protein 4.1-like ENSSTUG00000001843: B1, B2, B3, B4, B5, B6 (involved in B-cell differentiation...see: https://onlinelibrary.wiley.com/doi/full/10.1111/imm.13250)
 # suppressor of WNT signalling: https://www.sciencedirect.com/science/article/abs/pii/S0304383520306224
-p4<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000001843",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p4<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000001843",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="EPB41-like",subtitle="ENSSTUG00000001843 | B1-6")
 
 # mef2cb
-p5<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000006634",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p5<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000006634",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="mef2cb",subtitle="ENSSTUG00000006634 | B1-6")
@@ -150,7 +151,7 @@ p5<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000006634",mi
 # regulator of B-cell homeostasis: https://pubmed.ncbi.nlm.nih.gov/19211936/
 
 # CD37: highly abundant on mature B-cells
-p6<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000006678",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p6<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000006678",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="CD37-like*",subtitle="ENSSTUG00000006634 | B1,B2,B4-6")
@@ -188,7 +189,7 @@ F7C<-as.ggplot(grid.arrange(p1,p2,p3,p4,p5,p6,nrow=3,top=textGrob("C", x = 0, hj
 
 # Quite B1-specific...but mostly expressed in upper part
 # also scseq Bcell marker in zebrafish: https://elifesciences.org/reviewed-preprints/92424v1
-p7<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000017243",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p7<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000017243",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="zgc:194275",subtitle="ENSSTUG00000017243 | B1\nB2 (<60%)")
@@ -203,7 +204,7 @@ p7<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000017243",mi
 ######################################
 
 # B1 with some in B2: arhgap24
-p8<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000010099",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p8<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000010099",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="arhgap24",subtitle="ENSSTUG00000010099 | B1\nB2 (<60%)")
@@ -229,7 +230,7 @@ p8<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000010099",mi
 ###############
 
 # B2: band 4.1-like protein 1 (aka EPB41) --> quite specific to B2 but some in B1
-p9<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000043834",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p9<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000043834",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="EPB41-like",subtitle="ENSSTUG00000043834 | B2\nB1,B6 (<60%)")
@@ -249,7 +250,7 @@ p9<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000043834",mi
 
 # B3: RAG1 --> VERY IMPORTANT GENE!!!
 # expressed in developing B-cells https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2676217/
-p10<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000005374",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p10<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000005374",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="rag1",subtitle="ENSSTUG00000005374 | B3\nB5,B6 (<60%)")
@@ -283,7 +284,7 @@ p10<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000005374",m
 # B4: carhsp1: calcium-regulated heat stable protein 1-like
 # not much else that is very specific to B4 (i.e. not also expressed in other clusters)
 # we know that this is a highly proliferative cluster
-p11<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000026177",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p11<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000026177",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="carhsp1",subtitle="ENSSTUG00000026177 | B4\nB5 (<60%)")
@@ -297,7 +298,7 @@ p11<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000026177",m
 # B-cell activation: https://pubmed.ncbi.nlm.nih.gov/21659539/
 # B-helper cells https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2193094/
 # rapidly activated in T-cells upon activation: https://onlinelibrary.wiley.com/doi/pdf/10.1002/eji.200425478
-p12<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000007343",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p12<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000007343",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="cxcr5",subtitle="ENSSTUG00000007343 | B5\nB1 (<60%)")
@@ -315,14 +316,14 @@ p12<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000007343",m
 ######
 
 # B3,B5,B6: xpa (DNA repair)
-p13<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000026759",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p13<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000026759",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="xpa",subtitle="ENSSTUG00000026759 | B3,B5,B6\nB4 (<60%)")
 
 # B6: pkdr2 is the only one which is high abundance exclusively in B6, but it is also expressed in 1,2,and 5-
 # important for regulatory B-cell function: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8761795/
-p14<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000001609",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p14<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000001609",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="pkdr2",subtitle="ENSSTUG00000001609 | B6\nB1,B2,B5 (<60%)")
@@ -336,7 +337,7 @@ p14<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000001609",m
 
 # B7: dickkopf-related protein 4
 # wnt signalling
-p15<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000032962",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p15<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000032962",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="DKK4-like",subtitle="ENSSTUG00000032962 | B7")
@@ -365,31 +366,31 @@ F7D<-as.ggplot(grid.arrange(p7,p8,p9,p10,p11,p12,p13,p14,p15,nrow=3,top=textGrob
 
 # PATTERN1: Expression throughout B-cells except for B3
 # ENSSTUG00000010446 BCR heavy IgM: B6, B4, B5, B7, B1, B2 (weak expression THROUGHOUT B1 and 2)
-p16<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000010446",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p16<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000010446",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="IGHM-like*",subtitle="ENSSTUG00000010446 | B1-2,B4-7")
 # PATTERN2: Expression tapering in B1 and 2 in parallel fashion
 # ENSSTUG00000027283 BCR light IgL kappa 1 IGKC1: B4, B1, B2, B6, B7, B5 (TAPERING expression B1 and 2)
-p17<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000027283",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p17<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000027283",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="IGKC1-like*",subtitle="ENSSTUG00000027283 | B1-2,B4-7")
 # PATTERN3: Expression THROUGHOUT B1 but tapering or absent in B2
 # ENSSTUG00000040813: expressed THROUGHOUT B1 (but also 4,5,7); ENSEMBL lists immunoglobulin-like domains (specifically V-set) in detected protein domains
-p18<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000040813",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p18<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000040813",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="V-set domain-containing",subtitle="ENSSTUG00000040813 | B1,B4-5,B7")
 # PATTERN4:
 # ENSSTUG00000040711 concentrated in B7, tapering / bimodal expression in B1, some also in B4/5: ENSEMBL lists immunoglobulin-like domains (specifically C1-set) in detected protein domains; top blast hits to immunoglobulin lambda-like; top blast hit to Ig light chain (O.mykiss, 92.34% ident)
-p19<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000040711",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p19<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000040711",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="C-set domain-containing",subtitle="ENSSTUG00000040711 | B1,B4-5,B7")
 # PATTERN5: B3/4
 # mikado.22G195 Ig-like domain-containing protein (IGLL1-like): B3/4
-p20<-FeaturePlot(immune.combined.sct.downsampled,features="mikado.22G195",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p20<-FeaturePlot(immune.combined.sct,features="mikado.22G195",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="IGLL1-like",subtitle="mikado.22G195 | B3,B4") 
@@ -402,7 +403,7 @@ F7E<-as.ggplot(grid.arrange(p16,p17,p18,p19,p20,nrow=1,top=textGrob("E", x = 0, 
 #####################
 
 ## SUMMARY UMAP FIGURE
-uplot<-UMAPPlot(immune.combined.sct.downsampled)
+uplot<-UMAPPlot(immune.combined.sct)
 uplotdat<-uplot$data
 colnames(uplotdat)[3]<-"cluster"
 # need to manually alter some numbers for compatibility
@@ -450,6 +451,6 @@ lay <- rbind(c(1,1,2,2,2),
 
 grobz <- lapply(list(F7A,F7B,F7C,F7D,F7E), ggplotGrob)
 
-pdf("Figure7_UPDATED_170724.pdf", width = 20, height = 25)
+pdf("Figure7_UPDATED_FULL_170724.pdf", width = 20, height = 25)
 grid.arrange(grobs = grobz, layout_matrix = lay)
 dev.off()

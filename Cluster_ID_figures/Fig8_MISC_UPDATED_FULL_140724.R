@@ -3,7 +3,6 @@
 # UPDATED 14/07/24
 
 library(dplyr)
-library(biomaRt)
 library(ggplot2)
 library(data.table)
 library(Seurat)
@@ -18,16 +17,16 @@ library(ggplotify)
 `%not_in%`<-Negate(`%in%`)
 
 # Load in dataset
-load("C:/Users/James/Documents/R/trout_local/trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.downsamp.rds")
-DefaultAssay(immune.combined.sct.downsampled)<-"integrated"
+load("../trout_SCTprocessed_PC30k30_var.ft.filt_finalclusters_180224.rds")
+DefaultAssay(immune.combined.sct)<-"integrated"
 
 # read in clustermarker data
-clustmarkers<-read.delim("Seurat_cluster_ID/current/all_clustermarkers_annotated_180224.txt",header=T,sep="\t")%>%subset(avg_log2FC>=1)
-fshmk_small<-read.table("cell_marker_compilation/fish_compilation/all_potential_markers_long_290124.txt",sep="\t",header=T)
-fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct.downsampled))
+clustmarkers<-read.delim("all_clustermarkers_annotated_180224.txt",header=T,sep="\t")%>%subset(avg_log2FC>=1)
+fshmk_small<-read.table("all_potential_markers_long_290124.txt",sep="\t",header=T)
+fshmk_small<-subset(fshmk_small, gene_id%in%VariableFeatures(immune.combined.sct))
 
 # read in cluster labels
-clabs<-read.table("Seurat_cluster_ID/current/cluster_classifications_120724.txt",sep="\t",header=T)
+clabs<-read.table("cluster_classifications_120724.txt",sep="\t",header=T)
 clustmarkers<-merge(clustmarkers,clabs[c(1:3)],by="cluster")
 
 # keep one version with all clustermarkers
@@ -51,12 +50,12 @@ nrow(NKcells[!duplicated(NKcells$gene_id),])
 # 4 genes are markers uniquely of the NK-cells (nice)
 
 # perforin (prior marker)
-p1<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000019827",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p1<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000019827",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="prf1*",subtitle="ENSSTUG00000019827 | NK")
 # NK-lysin-like
-p2<-FeaturePlot(immune.combined.sct.downsampled,features="mikado.33G809",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p2<-FeaturePlot(immune.combined.sct,features="mikado.33G809",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="NK-lysin-like",subtitle="mikado.33G809 | NK")
@@ -73,13 +72,13 @@ nrow(Thcells[!duplicated(Thcells$gene_id),])
 # thrombopoietin receptor-like (prior marker)
 # "Thrombopoietin was shown to be the major regulator of megakaryocytopoiesis and platelet formation" (Wiki)
 # also important for HSC maintenance: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8292222/
-p3<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000005928",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p3<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000005928",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="mpl*",subtitle="ENSSTUG00000005928 | TH")
 # thrombospondin-1-like
 # role in platelet aggregation: https://pubmed.ncbi.nlm.nih.gov/6501568/
-p4<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000013788",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p4<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000013788",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="thbs1b",subtitle="ENSSTUG00000013788 | TH")
@@ -94,13 +93,13 @@ nrow(RBcells[!duplicated(RBcells$gene_id),])
 # important to identify these because Hemoglobin is expressed elsewhere
 
 # canonical RBC marker but NOT unique to RBC cluster:
-p5<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000013812",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p5<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000013812",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="hbaa2*",subtitle="ENSSTUG00000013812 | RBC\nNA1 (<60%)")
 # one of 11 unique to RBC cluster:
 # 5-aminolevulinate synthase, erythroid-specific, mitochondrial-like
-p6<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000037820",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p6<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000037820",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="alas2",subtitle="ENSSTUG00000037820 | RBC")
@@ -122,11 +121,11 @@ MPcells<-merge(distinct(MPcells[-c(10)]),(aggregate(primary_ct~gene_id, fshmk_sm
 # includes proliferation marker PCNA, H2AZ, thrombocyte marker mpl, MHCII B (antigen), CD74 (monocyte)
 # also three 'fos' genes and JUND: these along with egr1 are all implicated in early myeloid cell function: https://www.sciencedirect.com/science/article/pii/S0006497120519794
 # so I think the evidence is there that these are myeloid progenitors
-p7<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000010274",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p7<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000010274",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="kita",subtitle="ENSSTUG00000010274 | MP")
-p8<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000012364",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p8<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000012364",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="egr1",subtitle="ENSSTUG00000012364 | MP")
@@ -148,12 +147,12 @@ nrow(RNcells[!duplicated(RNcells$gene_id),])
 #subset(clustmarkers_all,gene_id=="ENSSTUG00000049645")
 
 # CD59-like
-p9<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000040811",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p9<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000040811",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="ly97.3",subtitle="ENSSTUG00000012672 | RN1\nRN2 (<60%)")
 # NOTE these are the only clusters to express GAPDH
-p10<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000049645",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+p10<-FeaturePlot(immune.combined.sct,features="ENSSTUG00000049645",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "italic"))+
   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="gapdh",subtitle="ENSSTUG00000049645 | RN1\nRN2 (<60%)")
@@ -165,12 +164,12 @@ p10<-FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000049645",m
 # # subset for those NOT markers of other clusters (EVEN THOSE NOT HIGH ABUNDANCE! THIS IS VERY STRINGENT!)
 # NA2cells<-subset(NA2cells,gene_id%not_in%subset(clustmarkers_all,cluster%not_in%NA2cells$cluster)$gene_id) 
 # # However it is not unique to NA2, so it has no unique markers
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000018003",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000018003",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
 #   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="MMP13-like",subtitle="ENSSTUG00000018003 | NA2,N1")
 # # Note also however the elevated expression of B-cell markers, with IGLC1-like being a prime example:
-# FeaturePlot(immune.combined.sct.downsampled,features="ENSSTUG00000015148",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
+# FeaturePlot(immune.combined.sct,features="ENSSTUG00000015148",min.cutoff = "q10", max.cutoff = "q90",raster=T)+
 #   theme(plot.title = element_text(hjust = 0))+theme(plot.title = element_text(face = "plain"))+
 #   theme(axis.line.x = element_blank())+theme(axis.line.y = element_blank())+
 #   theme(axis.text = element_blank(), axis.ticks = element_blank())+labs(x="",y="",title="IGLC1-like",subtitle="ENSSTUG00000015148 | B1,B2,B5,B6\nNA2(logFC<1)")
@@ -195,6 +194,6 @@ F8C<-as.ggplot(grid.arrange(p5,p6,nrow=2,top=textGrob("C", x = 0, hjust = 0,gp=g
 F8D<-as.ggplot(grid.arrange(p7,p8,nrow=2,top=textGrob("D", x = 0, hjust = 0,gp=gpar(cex=2))))+theme(panel.border=element_rect(fill=NA))
 F8E<-as.ggplot(grid.arrange(p9,p10,nrow=2,top=textGrob("E", x = 0, hjust = 0,gp=gpar(cex=2))))+theme(panel.border=element_rect(fill=NA))
 
-pdf("Figure8_UPDATED_140724.pdf", width = 17, height = 7)
+pdf("Figure8_UPDATED_FULL_140724.pdf", width = 17, height = 7)
 grid.arrange(F8A,F8B,F8C,F8D,F8E,nrow=1)
 dev.off()
